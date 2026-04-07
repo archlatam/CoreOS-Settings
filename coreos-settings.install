@@ -1,0 +1,50 @@
+SERVICES=("systemd-zram-setup@zram0")
+
+post_install() {
+    echo "CoreOS-Settings: Aplicando configuración..."
+    
+    # Aplicar parámetros sysctl
+    sysctl --system 2>/dev/null || true
+    
+    # Recargar reglas udev
+    udevadm control --reload-rules 2>/dev/null || true
+    
+    # Asegurar que zram-generator esté habilitado
+    systemctl enable systemd-zram-setup@zram0 2>/dev/null || true
+    
+    # Crear archivos tmpfiles
+    systemd-tmpfiles --create 2>/dev/null || true
+    
+    echo "CoreOS-Settings: Instalación completada."
+    echo "Por favor reinicie el sistema para aplicar todos los cambios."
+}
+
+post_upgrade() {
+    echo "CoreOS-Settings: Actualizando configuración..."
+    
+    # Recargar parámetros sysctl
+    sysctl --system 2>/dev/null || true
+    
+    # Recargar reglas udev
+    udevadm control --reload-rules 2>/dev/null || true
+    
+    # Recrear archivos tmpfiles
+    systemd-tmpfiles --create 2>/dev/null || true
+    
+    # Reiniciar servicio de zram si está activo
+    if systemctl is-active systemd-zram-setup@zram0 &>/dev/null; then
+        systemctl restart systemd-zram-setup@zram0
+    fi
+    
+    echo "CoreOS-Settings: Actualización completada."
+    echo "Por favor reinicie el sistema para aplicar todos los cambios."
+}
+
+pre_remove() {
+    echo "CoreOS-Settings: Preparando desinstalación..."
+}
+
+post_remove() {
+    echo "CoreOS-Settings: Desinstalación completada."
+    echo "Por favor reinicie el sistema."
+}

@@ -1,0 +1,13 @@
+[Unit]
+Description=ZRAM Swap Setup
+After=local-fs.target
+Before=swap.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /usr/bin/zram-setup.sh setup
+ExecStop=/usr/bin/bash /usr/bin/zram-setup.sh teardown
+RemainAfterExit=yes
+
+[Install]
+WantedBy=swap.target
